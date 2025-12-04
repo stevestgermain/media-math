@@ -5,7 +5,7 @@ import { InputField } from './components/InputField';
 
 // --- BENCHMARK DATA ---
 const INDUSTRIES: Industry[] = ['Average', 'Retail', 'Auto', 'Finance', 'Travel', 'B2B', 'Tech'];
-const MEDIA_TYPES: MediaType[] = ['Display', 'Social', 'Video', 'Search'];
+const MEDIA_TYPES: MediaType[] = ['Display', 'Social', 'Video', 'Search', 'Audio'];
 
 // Simplified Benchmark Database (Source: General Industry Averages)
 const BENCHMARKS: Record<MediaType, Record<Industry, { cpm: number; ctr: number; cpv: number; viewRate: number }>> = {
@@ -44,6 +44,15 @@ const BENCHMARKS: Record<MediaType, Record<Industry, { cpm: number; ctr: number;
     'Travel': { cpm: 22.00, ctr: 2.80, cpv: 0, viewRate: 0 },
     'B2B': { cpm: 35.00, ctr: 1.50, cpv: 0, viewRate: 0 },
     'Tech': { cpm: 28.00, ctr: 2.20, cpv: 0, viewRate: 0 },
+  },
+  'Audio': {
+    'Average': { cpm: 18.00, ctr: 0.10, cpv: 0.05, viewRate: 90.0 }, // ViewRate here represents Listen Through Rate
+    'Retail': { cpm: 15.00, ctr: 0.15, cpv: 0.04, viewRate: 85.0 },
+    'Auto': { cpm: 22.00, ctr: 0.08, cpv: 0.06, viewRate: 95.0 },
+    'Finance': { cpm: 25.00, ctr: 0.05, cpv: 0.08, viewRate: 88.0 },
+    'Travel': { cpm: 16.00, ctr: 0.12, cpv: 0.05, viewRate: 92.0 },
+    'B2B': { cpm: 30.00, ctr: 0.05, cpv: 0.10, viewRate: 80.0 },
+    'Tech': { cpm: 20.00, ctr: 0.09, cpv: 0.07, viewRate: 85.0 },
   }
 };
 
