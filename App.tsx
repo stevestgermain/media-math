@@ -282,7 +282,7 @@ const App: React.FC = () => {
             <Calculator className="h-6 w-6 text-white" />
           </div>
           <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900">
-            Media Calculator
+            CPM Calculator
           </h1>
           <p className="mt-2 text-sm text-gray-600">
             Fill in any two variables to find the third.
