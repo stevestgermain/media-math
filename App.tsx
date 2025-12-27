@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Calculator, DollarSign, Eye, MousePointer2, Percent, Play, Sparkles, Eraser, Trophy, AlertCircle, Minus, TrendingUp, BarChart3, ChevronDown, ChevronUp } from 'lucide-react';
 import { CalculatorState, TabType, Industry, MediaType, BenchmarkResult } from './types';
 import { InputField } from './components/InputField';
+import { MobileInstallGuide } from './components/MobileInstallGuide';
 
 // --- BENCHMARK DATA ---
 const INDUSTRIES: Industry[] = ['Average', 'Retail', 'Auto', 'Finance', 'Travel', 'B2B', 'Tech'];
@@ -546,12 +547,10 @@ const App: React.FC = () => {
           )}
         </div>
         
+        {/* Mobile Install Guide */}
+        <MobileInstallGuide />
       </div>
     </div>
-  );
-};
-
-export default App;
   );
 };
 
