@@ -1,25 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { X, Share, PlusSquare, MoreVertical, Smartphone, Download } from 'lucide-react';
+import { X, Share, PlusSquare, MoreVertical, Smartphone, Download, Check } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-export const InstallPrompt: React.FC = () => {
+interface InstallPromptProps {
+  trigger: boolean;
+}
+
+export const InstallPrompt: React.FC<InstallPromptProps> = ({ trigger }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [platform, setPlatform] = useState<'ios' | 'android-iframe' | 'android-direct' | 'other'>('other');
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
+  // 1. Listen for Android native install event immediately (in case it fires early)
   useEffect(() => {
-    // 1. Check if seen before
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  }, []);
+
+  // 2. Determine visibility when 'trigger' becomes true (User clicked Solve)
+  useEffect(() => {
+    if (!trigger) return;
+
+    // Check if seen before
     const hasSeen = localStorage.getItem('mediaDrive_installPromptSeen');
     if (hasSeen) return;
 
-    // 2. Check if mobile (width < 768px)
+    // Check if mobile (width < 768px)
     if (window.innerWidth >= 768) return;
 
-    // 3. Detect Environment
+    // Detect Environment
     const ua = navigator.userAgent;
     const isIOS = /iPhone|iPad|iPod/i.test(ua);
     const isAndroid = /Android/i.test(ua);
@@ -33,34 +50,13 @@ export const InstallPrompt: React.FC = () => {
         setPlatform('android-iframe');
         setIsVisible(true);
       } else {
-        // Direct Android visit: wait for beforeinstallprompt
+        // Direct Android visit
         setPlatform('android-direct');
-        // If event doesn't fire (already installed or not fully PWA compliant), 
-        // we might choose to show nothing or a fallback. 
-        // For now, we default to hidden until event fires.
-      }
-    }
-  }, []);
-
-  // Listen for the native install prompt event (Android Direct)
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault();
-      // Stash the event so it can be triggered later.
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-      // Update UI notify the user they can install the PWA
-      if (!localStorage.getItem('mediaDrive_installPromptSeen')) {
+        // We show the modal if we have a deferred prompt OR just as instructions if not
         setIsVisible(true);
       }
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
+    }
+  }, [trigger]);
 
   const handleDismiss = () => {
     setIsVisible(false);
@@ -69,13 +65,8 @@ export const InstallPrompt: React.FC = () => {
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
-    
-    // Show the install prompt
     await deferredPrompt.prompt();
-    
-    // Wait for the user to respond to the prompt
     const { outcome } = await deferredPrompt.userChoice;
-    
     if (outcome === 'accepted') {
       handleDismiss();
     }
@@ -85,77 +76,125 @@ export const InstallPrompt: React.FC = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 animate-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-white rounded-xl shadow-xl shadow-gray-200/50 ring-1 ring-gray-900/5 p-4 relative overflow-hidden">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 px-4 pb-20 text-center sm:block sm:p-0">
+      
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 bg-gray-900/75 backdrop-blur-sm transition-opacity animate-in fade-in duration-300" 
+        onClick={handleDismiss}
+        aria-hidden="true" 
+      />
+
+      {/* Modal Panel */}
+      <div className="relative inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-sm w-full max-w-sm animate-in zoom-in-95 duration-300">
         
-        {/* Dismiss Button */}
+        {/* Close Button */}
         <button 
           onClick={handleDismiss}
-          className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+          className="absolute top-4 right-4 p-1 rounded-full text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors focus:outline-none"
         >
-          <X className="h-4 w-4" />
+          <X className="h-5 w-5" />
         </button>
 
-        <div className="flex gap-4">
-          <div className="shrink-0">
-            <div className="h-10 w-10 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600">
-              <Smartphone className="h-6 w-6" />
+        <div className="px-6 pt-8 pb-6">
+          <div className="flex flex-col items-center text-center">
+            
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50 mb-5">
+              <Smartphone className="h-7 w-7 text-indigo-600" />
             </div>
-          </div>
-          
-          <div className="flex-1 pr-6">
-            <h3 className="text-sm font-semibold text-gray-900 mb-1">
-              Install App
+            
+            <h3 className="text-lg font-bold text-gray-900 mb-2">
+              Install Media Drive
             </h3>
             
-            <p className="text-xs text-gray-500 mb-3 leading-relaxed">
-              Add Media Drive to your home screen for instant, full-screen access.
+            <p className="text-sm text-gray-500 leading-relaxed mb-6">
+              Get the best experience. Add this tool to your home screen for instant, full-screen access.
             </p>
 
-            {/* iOS Instructions */}
-            {platform === 'ios' && (
-              <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded border border-gray-100 flex flex-col gap-1.5">
-                <div className="flex items-center gap-2">
-                  <span>1. Tap</span>
-                  <Share className="h-3.5 w-3.5 text-blue-500" />
-                  <span>Share in menu bar</span>
+            {/* Instructions Box */}
+            <div className="w-full bg-gray-50 rounded-xl border border-gray-100 p-4 text-left">
+              
+              {/* iOS Instructions */}
+              {platform === 'ios' && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-sm text-gray-700">
+                    <div className="flex items-center justify-center h-6 w-6 rounded bg-white border border-gray-200 shadow-sm shrink-0">
+                      <Share className="h-3.5 w-3.5 text-blue-500" />
+                    </div>
+                    <span>Tap <strong>Share</strong> in menu bar</span>
+                  </div>
+                  <div className="w-full h-px bg-gray-200/60" />
+                  <div className="flex items-center gap-3 text-sm text-gray-700">
+                     <div className="flex items-center justify-center h-6 w-6 rounded bg-white border border-gray-200 shadow-sm shrink-0">
+                      <PlusSquare className="h-3.5 w-3.5 text-gray-600" />
+                    </div>
+                    <span>Select <strong>Add to Home Screen</strong></span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span>2. Select</span>
-                  <PlusSquare className="h-3.5 w-3.5 text-gray-600" />
-                  <span>Add to Home Screen</span>
-                </div>
-              </div>
-            )}
+              )}
 
-            {/* Android Iframe Instructions */}
-            {platform === 'android-iframe' && (
-              <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded border border-gray-100 flex flex-col gap-1.5">
-                <div className="flex items-center gap-2">
-                  <span>1. Tap</span>
-                  <MoreVertical className="h-3.5 w-3.5 text-gray-600" />
-                  <span>in browser menu</span>
+              {/* Android Iframe Instructions */}
+              {platform === 'android-iframe' && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-sm text-gray-700">
+                     <div className="flex items-center justify-center h-6 w-6 rounded bg-white border border-gray-200 shadow-sm shrink-0">
+                      <MoreVertical className="h-3.5 w-3.5 text-gray-600" />
+                    </div>
+                    <span>Tap <strong>Menu</strong> (3 dots)</span>
+                  </div>
+                  <div className="w-full h-px bg-gray-200/60" />
+                   <div className="flex items-center gap-3 text-sm text-gray-700">
+                    <div className="flex items-center justify-center h-6 w-6 rounded bg-white border border-gray-200 shadow-sm shrink-0">
+                      <Download className="h-3.5 w-3.5 text-gray-600" />
+                    </div>
+                    <span>Select <strong>Install App</strong></span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span>2. Select</span>
-                  <span className="font-medium">Install App</span>
-                  <span>or</span>
-                  <span className="font-medium">Add to Home</span>
-                </div>
-              </div>
-            )}
+              )}
 
-            {/* Android Direct Button */}
-            {platform === 'android-direct' && deferredPrompt && (
-              <button
-                onClick={handleInstallClick}
-                className="w-full mt-1 flex justify-center items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
-              >
-                <Download className="h-3.5 w-3.5" />
-                Install Now
-              </button>
-            )}
+              {/* Android Direct Button */}
+              {platform === 'android-direct' && (
+                <div>
+                   {deferredPrompt ? (
+                    <button
+                      onClick={handleInstallClick}
+                      className="w-full flex justify-center items-center gap-2 rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition-colors"
+                    >
+                      <Download className="h-4 w-4" />
+                      Install App Now
+                    </button>
+                   ) : (
+                     <div className="space-y-3">
+                        <div className="flex items-center gap-3 text-sm text-gray-700">
+                          <div className="flex items-center justify-center h-6 w-6 rounded bg-white border border-gray-200 shadow-sm shrink-0">
+                            <MoreVertical className="h-3.5 w-3.5 text-gray-600" />
+                          </div>
+                          <span>Tap <strong>Menu</strong> (3 dots)</span>
+                        </div>
+                        <div className="w-full h-px bg-gray-200/60" />
+                        <div className="flex items-center gap-3 text-sm text-gray-700">
+                          <div className="flex items-center justify-center h-6 w-6 rounded bg-white border border-gray-200 shadow-sm shrink-0">
+                            <Download className="h-3.5 w-3.5 text-gray-600" />
+                          </div>
+                          <span>Select <strong>Add to Home Screen</strong></span>
+                        </div>
+                      </div>
+                   )}
+                </div>
+              )}
+            </div>
           </div>
+        </div>
+        
+        {/* Footer */}
+        <div className="bg-gray-50/50 px-6 py-4 flex justify-center border-t border-gray-100">
+          <button
+            type="button"
+            className="text-sm font-medium text-gray-400 hover:text-gray-600 transition-colors"
+            onClick={handleDismiss}
+          >
+            Maybe later
+          </button>
         </div>
       </div>
     </div>
