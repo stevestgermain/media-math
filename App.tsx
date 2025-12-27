@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Calculator, DollarSign, Eye, MousePointer2, Percent, Play, Sparkles, Eraser, Trophy, AlertCircle, Minus, TrendingUp, BarChart3, ChevronDown, ChevronUp } from 'lucide-react';
 import { CalculatorState, TabType, Industry, MediaType, BenchmarkResult } from './types';
 import { InputField } from './components/InputField';
-import { InstallPrompt } from './components/InstallPrompt';
 
 // --- BENCHMARK DATA ---
 const INDUSTRIES: Industry[] = ['Average', 'Retail', 'Auto', 'Finance', 'Travel', 'B2B', 'Tech'];
@@ -107,9 +106,6 @@ const App: React.FC = () => {
 
   // Track the most recently calculated result to trigger benchmarking
   const [computedResult, setComputedResult] = useState<{metric: 'cpm' | 'ctr' | 'cpv' | 'viewRate', value: number} | null>(null);
-  
-  // Trigger for install prompt
-  const [hasCalculated, setHasCalculated] = useState(false);
 
   const [state, setState] = useState<CalculatorState>({
     budget: '',
@@ -273,14 +269,11 @@ const App: React.FC = () => {
 
     if (metric) {
       setComputedResult({ metric, value: newVal });
-      // Trigger the install prompt on first successful solve
-      setHasCalculated(true);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-start pt-8 pb-12 px-4 sm:px-6 lg:px-8 font-sans">
-      <InstallPrompt trigger={hasCalculated} />
       <div className="w-full max-w-md">
         
         {/* Header */}
@@ -555,6 +548,10 @@ const App: React.FC = () => {
         
       </div>
     </div>
+  );
+};
+
+export default App;
   );
 };
 
