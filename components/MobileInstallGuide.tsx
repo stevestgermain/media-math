@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Share, PlusSquare, MoreVertical, X, Smartphone } from 'lucide-react';
+import { Share, PlusSquare, MoreVertical, X, Gauge } from 'lucide-react';
 
 export const MobileInstallGuide: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -46,49 +46,54 @@ export const MobileInstallGuide: React.FC = () => {
   if (!isVisible || platform === 'other') return null;
 
   return (
-    <div className="mt-6 w-full rounded-xl bg-gray-50 border-2 border-dashed border-gray-200 p-4 relative animate-in slide-in-from-bottom-4 fade-in duration-500">
+    <div className="mt-8 w-full bg-white rounded-2xl border-2 border-dashed border-indigo-200 p-5 relative shadow-sm animate-in slide-in-from-bottom-4 fade-in duration-500 overflow-hidden">
       <button 
         onClick={handleDismiss}
-        className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-full transition-colors"
+        className="absolute top-2 right-2 p-1.5 text-gray-300 hover:text-gray-500 hover:bg-gray-50 rounded-full transition-colors z-10"
         aria-label="Dismiss guide"
       >
-        <X className="w-3.5 h-3.5" />
+        <X className="w-4 h-4" />
       </button>
 
-      <div className="flex flex-col gap-2 pr-4">
-        <div className="flex items-center gap-2">
-          <Smartphone className="w-4 h-4 text-indigo-600" />
-          <span className="text-xs font-bold text-indigo-900 uppercase tracking-wide">
-            Pro Tip: Save App for Quick Access
-          </span>
+      <div className="flex gap-5 items-center">
+        {/* Visual: App Icon Preview */}
+        <div className="shrink-0 flex flex-col items-center gap-2">
+           <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl shadow-lg shadow-indigo-200 flex items-center justify-center text-white ring-2 ring-white ring-offset-2 ring-offset-gray-50">
+              <Gauge className="w-7 h-7" strokeWidth={2.5} />
+           </div>
+           <span className="text-[10px] font-medium text-gray-400">Preview</span>
         </div>
-        
-        <div className="text-xs text-gray-600 leading-relaxed flex flex-wrap items-center gap-1">
-          {platform === 'ios' ? (
-            <>
+
+        {/* Content: Instructions */}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-1">
+            Pro-Tip
+          </h3>
+          <p className="text-sm font-bold text-gray-900 mb-2 leading-tight">
+            Enable quick access from your mobile home screen
+          </p>
+          
+          <div className="text-xs text-gray-600 leading-relaxed">
+            <div className="flex flex-wrap items-center gap-1.5">
               <span>Tap</span>
-              <span className="inline-flex items-center justify-center bg-white border border-gray-200 rounded px-1 py-0.5 mx-0.5 shadow-sm">
-                <Share className="w-3 h-3 text-blue-500" />
+              {platform === 'ios' ? (
+                <span className="inline-flex items-center justify-center bg-gray-50 border border-gray-200 rounded-md px-1.5 py-1 shadow-sm">
+                  <Share className="w-3.5 h-3.5 text-blue-500" />
+                </span>
+              ) : (
+                <span className="inline-flex items-center justify-center bg-gray-50 border border-gray-200 rounded-md px-1.5 py-1 shadow-sm">
+                  <MoreVertical className="w-3.5 h-3.5 text-gray-600" />
+                </span>
+              )}
+              <span>then select</span>
+            </div>
+            <div className="flex items-center gap-1.5 mt-1.5">
+              <span className="font-semibold text-gray-800 whitespace-nowrap">"Add to Home Screen"</span>
+              <span className="inline-flex items-center justify-center bg-gray-50 border border-gray-200 rounded-md px-1.5 py-1 shadow-sm">
+                <PlusSquare className="w-3.5 h-3.5 text-gray-500" />
               </span>
-              <span>Share, then select</span>
-              <span className="font-medium text-gray-900 whitespace-nowrap">"Add to Home Screen"</span>
-              <span className="inline-flex items-center justify-center bg-white border border-gray-200 rounded px-1 py-0.5 mx-0.5 shadow-sm">
-                <PlusSquare className="w-3 h-3 text-gray-500" />
-              </span>
-            </>
-          ) : (
-            <>
-              <span>Tap</span>
-              <span className="inline-flex items-center justify-center bg-white border border-gray-200 rounded px-1 py-0.5 mx-0.5 shadow-sm">
-                <MoreVertical className="w-3 h-3 text-gray-600" />
-              </span>
-              <span>Menu, then select</span>
-              <span className="font-medium text-gray-900 whitespace-nowrap">"Add to Home Screen"</span>
-              <span className="inline-flex items-center justify-center bg-white border border-gray-200 rounded px-1 py-0.5 mx-0.5 shadow-sm">
-                <PlusSquare className="w-3 h-3 text-gray-500" />
-              </span>
-            </>
-          )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
