@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Calculator, DollarSign, Eye, MousePointer2, Percent, Play, Sparkles, Eraser, Trophy, AlertCircle, Minus, TrendingUp, BarChart3, ChevronDown, ChevronUp } from 'lucide-react';
 import { CalculatorState, TabType, Industry, MediaType, BenchmarkResult } from './types';
 import { InputField } from './components/InputField';
+import { InstallPrompt } from './components/InstallPrompt';
 
 // --- BENCHMARK DATA ---
 const INDUSTRIES: Industry[] = ['Average', 'Retail', 'Auto', 'Finance', 'Travel', 'B2B', 'Tech'];
@@ -274,6 +275,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-start pt-8 pb-12 px-4 sm:px-6 lg:px-8 font-sans">
+      <InstallPrompt />
       <div className="w-full max-w-md">
         
         {/* Header */}
