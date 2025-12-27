@@ -107,6 +107,9 @@ const App: React.FC = () => {
 
   // Track the most recently calculated result to trigger benchmarking
   const [computedResult, setComputedResult] = useState<{metric: 'cpm' | 'ctr' | 'cpv' | 'viewRate', value: number} | null>(null);
+  
+  // Trigger for install prompt
+  const [hasCalculated, setHasCalculated] = useState(false);
 
   const [state, setState] = useState<CalculatorState>({
     budget: '',
@@ -270,12 +273,14 @@ const App: React.FC = () => {
 
     if (metric) {
       setComputedResult({ metric, value: newVal });
+      // Trigger the install prompt on first successful solve
+      setHasCalculated(true);
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-start pt-8 pb-12 px-4 sm:px-6 lg:px-8 font-sans">
-      <InstallPrompt />
+      <InstallPrompt trigger={hasCalculated} />
       <div className="w-full max-w-md">
         
         {/* Header */}
@@ -284,7 +289,7 @@ const App: React.FC = () => {
             <Calculator className="h-6 w-6 text-white" />
           </div>
           <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900">
-            CPM Calculator
+            Media Calculator
           </h1>
           <p className="mt-2 text-sm text-gray-600">
             Fill in any two variables to find the third.
