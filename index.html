@@ -4,6 +4,32 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CPM Calculator</title>
+    <script>
+  // Apply theme INSTANTLY before React loads - prevents flash
+  (function() {
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+    
+    function handleMessage(event) {
+      if (event.data?.type === 'THEME_CHANGE') {
+        applyTheme(event.data.theme);
+      }
+    }
+    
+    window.addEventListener('message', handleMessage);
+    
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'REQUEST_THEME' }, '*');
+    } else {
+      applyTheme('light');
+    }
+  })();
+</script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
       body {
