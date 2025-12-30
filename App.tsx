@@ -302,7 +302,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black flex flex-col items-center justify-start pt-8 pb-12 px-4 sm:px-6 lg:px-8 font-sans transition-colors duration-300">
+    <div className="min-h-screen bg-white dark:bg-dark-bg flex flex-col items-center justify-start pt-8 pb-12 px-4 sm:px-6 lg:px-8 font-sans transition-colors duration-300">
       <div className="w-full max-w-md">
         
         {/* Header */}
