@@ -98,6 +98,7 @@ const getRandomTitle = (titles: string[]) => {
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('cpm');
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
   
   // Benchmark Selections
   const [industry, setIndustry] = useState<Industry | ''>('');
@@ -118,6 +119,33 @@ const App: React.FC = () => {
     ctr: '',
     viewRate: ''
   });
+
+  // Dark mode listener - receives theme changes from parent window
+  useEffect(() => {
+    const handleThemeMessage = (event: MessageEvent) => {
+      if (event.data?.type === 'THEME_CHANGE') {
+        setTheme(event.data.theme);
+      }
+    };
+
+    window.addEventListener('message', handleThemeMessage);
+    
+    // Request current theme from parent on mount
+    if (window.parent !== window) {
+      window.parent.postMessage({ type: 'REQUEST_THEME' }, '*');
+    }
+
+    return () => window.removeEventListener('message', handleThemeMessage);
+  }, []);
+
+  // Apply dark class to document root
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
 
   const updateState = (key: keyof CalculatorState, value: number | '') => {
     setState(prev => ({ ...prev, [key]: value }));
@@ -274,24 +302,24 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-start pt-8 pb-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-gray-50 dark:bg-black flex flex-col items-center justify-start pt-8 pb-12 px-4 sm:px-6 lg:px-8 font-sans transition-colors duration-300">
       <div className="w-full max-w-md">
         
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="mx-auto h-12 w-12 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md rotate-3 transform transition hover:rotate-6">
+          <div className="mx-auto h-12 w-12 bg-indigo-600 dark:bg-indigo-500 rounded-xl flex items-center justify-center shadow-md rotate-3 transform transition hover:rotate-6">
             <Calculator className="h-6 w-6 text-white" />
           </div>
-          <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900">
-            Media Calculator
+          <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+            CPM Calculator
           </h1>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             Fill in any two variables to find the third.
           </p>
         </div>
 
         {/* Tab Navigation */}
-        <div className="bg-white p-1 rounded-xl shadow-sm border border-gray-200 mb-6 flex overflow-x-auto">
+        <div className="bg-white dark:bg-zinc-900 p-1 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 mb-6 flex overflow-x-auto transition-colors duration-300">
           {[
             { id: 'cpm', label: 'CPM' },
             { id: 'ctr', label: 'CTR' },
@@ -306,8 +334,8 @@ const App: React.FC = () => {
               }}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-2 text-sm font-medium rounded-lg transition-all whitespace-nowrap ${
                 activeTab === tab.id
-                  ? 'bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200'
-                  : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 shadow-sm ring-1 ring-indigo-200 dark:ring-indigo-800'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800'
               }`}
             >
               {tab.label}
@@ -316,7 +344,7 @@ const App: React.FC = () => {
         </div>
 
         {/* Main Calculator Card */}
-        <div className="bg-white rounded-2xl shadow-xl shadow-gray-200/50 ring-1 ring-gray-900/5 p-6 sm:p-8">
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl shadow-gray-200/50 dark:shadow-black/50 ring-1 ring-gray-900/5 dark:ring-zinc-800 p-6 sm:p-8 transition-colors duration-300">
           
           {/* CPM TAB */}
           {activeTab === 'cpm' && (
@@ -442,14 +470,14 @@ const App: React.FC = () => {
           <div className="mt-8 flex gap-3">
             <button
               onClick={handleSolve}
-              className="flex-1 flex justify-center items-center gap-2 rounded-md bg-emerald-600 px-3 py-3 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 transition-colors"
+              className="flex-1 flex justify-center items-center gap-2 rounded-md bg-emerald-600 dark:bg-emerald-500 px-3 py-3 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-emerald-500 dark:hover:bg-emerald-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 dark:focus-visible:outline-emerald-500 transition-colors"
             >
               <Sparkles className="h-4 w-4" />
               Solve
             </button>
             <button
               onClick={handleClear}
-              className="flex-1 flex justify-center items-center gap-2 rounded-md bg-white px-3 py-3 text-sm font-medium leading-6 text-gray-700 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 transition-colors"
+              className="flex-1 flex justify-center items-center gap-2 rounded-md bg-white dark:bg-zinc-800 px-3 py-3 text-sm font-medium leading-6 text-gray-700 dark:text-gray-300 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors"
             >
               <Eraser className="h-4 w-4" />
               Clear All
@@ -458,45 +486,45 @@ const App: React.FC = () => {
         </div>
 
         {/* Benchmark Module (Separate Card) */}
-        <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="mt-6 bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 overflow-hidden transition-colors duration-300">
           <button 
             onClick={() => setIsBenchmarkExpanded(!isBenchmarkExpanded)}
-            className="w-full px-6 py-4 bg-gray-50/50 flex items-center justify-between hover:bg-gray-100/80 transition-colors focus:outline-none"
+            className="w-full px-6 py-4 bg-gray-50/50 dark:bg-zinc-800/50 flex items-center justify-between hover:bg-gray-100/80 dark:hover:bg-zinc-800 transition-colors focus:outline-none"
           >
             <div className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-indigo-600" />
-              <span className="text-sm font-semibold text-gray-900">Benchmark Analysis</span>
+              <BarChart3 className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+              <span className="text-sm font-semibold text-gray-900 dark:text-white">Benchmark Analysis</span>
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-xs text-gray-500 font-medium bg-white border border-gray-200 px-2 py-0.5 rounded-full shadow-sm">Optional</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 px-2 py-0.5 rounded-full shadow-sm">Optional</span>
               {isBenchmarkExpanded ? (
-                <ChevronUp className="h-4 w-4 text-gray-400" />
+                <ChevronUp className="h-4 w-4 text-gray-400 dark:text-gray-500" />
               ) : (
-                <ChevronDown className="h-4 w-4 text-gray-400" />
+                <ChevronDown className="h-4 w-4 text-gray-400 dark:text-gray-500" />
               )}
             </div>
           </button>
           
           {isBenchmarkExpanded && (
-            <div className="p-6 border-t border-gray-100 animate-in slide-in-from-top-2 fade-in duration-200">
+            <div className="p-6 border-t border-gray-100 dark:border-zinc-800 animate-in slide-in-from-top-2 fade-in duration-200">
                <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 mb-1.5">Industry</label>
+                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Industry</label>
                   <select 
                     value={industry}
                     onChange={(e) => setIndustry(e.target.value as Industry)}
-                    className="block w-full rounded-md border-0 py-2 pl-3 pr-8 text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 bg-gray-50"
+                    className="block w-full rounded-md border-0 py-2 pl-3 pr-8 text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-zinc-700 focus:ring-2 focus:ring-indigo-600 dark:focus:ring-indigo-500 sm:text-sm sm:leading-6 bg-gray-50 dark:bg-zinc-800 transition-colors"
                   >
                     <option value="">Select...</option>
                     {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-500 mb-1.5">Media Type</label>
+                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">Media Type</label>
                   <select 
                     value={mediaType}
                     onChange={(e) => setMediaType(e.target.value as MediaType)}
-                    className="block w-full rounded-md border-0 py-2 pl-3 pr-8 text-gray-900 ring-1 ring-inset ring-gray-200 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6 bg-gray-50"
+                    className="block w-full rounded-md border-0 py-2 pl-3 pr-8 text-gray-900 dark:text-white ring-1 ring-inset ring-gray-200 dark:ring-zinc-700 focus:ring-2 focus:ring-indigo-600 dark:focus:ring-indigo-500 sm:text-sm sm:leading-6 bg-gray-50 dark:bg-zinc-800 transition-colors"
                   >
                     <option value="">Select...</option>
                     {MEDIA_TYPES.map(m => <option key={m} value={m}>{m}</option>)}
@@ -506,14 +534,14 @@ const App: React.FC = () => {
 
               {benchmarkResult ? (
                  <div className={`mt-4 rounded-lg p-4 flex items-start gap-3 border transition-all duration-300 ease-in-out ${
-                  benchmarkResult.status === 'good' ? 'bg-green-50 border-green-200' :
-                  benchmarkResult.status === 'poor' ? 'bg-red-50 border-red-200' :
-                  'bg-yellow-50 border-yellow-200'
+                  benchmarkResult.status === 'good' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' :
+                  benchmarkResult.status === 'poor' ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' :
+                  'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800'
                 }`}>
                   <div className={`p-1.5 rounded-full shrink-0 ${
-                    benchmarkResult.status === 'good' ? 'bg-green-100 text-green-600' :
-                    benchmarkResult.status === 'poor' ? 'bg-red-100 text-red-600' :
-                    'bg-yellow-100 text-yellow-600'
+                    benchmarkResult.status === 'good' ? 'bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400' :
+                    benchmarkResult.status === 'poor' ? 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400' :
+                    'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-600 dark:text-yellow-400'
                   }`}>
                     {benchmarkResult.status === 'good' ? <Trophy className="h-4 w-4" /> :
                      benchmarkResult.status === 'poor' ? <AlertCircle className="h-4 w-4" /> :
@@ -521,15 +549,15 @@ const App: React.FC = () => {
                   </div>
                   <div>
                     <h4 className={`text-sm font-bold ${
-                       benchmarkResult.status === 'good' ? 'text-green-800' :
-                       benchmarkResult.status === 'poor' ? 'text-red-800' :
-                       'text-yellow-800'
+                       benchmarkResult.status === 'good' ? 'text-green-800 dark:text-green-300' :
+                       benchmarkResult.status === 'poor' ? 'text-red-800 dark:text-red-300' :
+                       'text-yellow-800 dark:text-yellow-300'
                     }`}>
                       {benchmarkResult.status === 'good' ? 'Above Benchmark' :
                        benchmarkResult.status === 'poor' ? 'Below Benchmark' :
                        'Industry Average'}
                     </h4>
-                    <p className="text-xs mt-1 text-gray-700 leading-relaxed">
+                    <p className="text-xs mt-1 text-gray-700 dark:text-gray-300 leading-relaxed">
                       <span className="font-semibold">{benchmarkResult.feedbackTitle}</span> Your <strong>{benchmarkResult.metricLabel}</strong> is 
                       <span className="font-semibold"> {benchmarkResult.diffPercent.toFixed(1)}% {
                         benchmarkResult.status === 'good' ? 'better' : 'worse'
@@ -539,7 +567,7 @@ const App: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <p className="text-xs text-gray-400 text-center mt-2 italic">
+                <p className="text-xs text-gray-400 dark:text-gray-500 text-center mt-2 italic">
                   Solve a calculation and select options above to see benchmarks.
                 </p>
               )}
