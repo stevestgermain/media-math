@@ -80,7 +80,7 @@ export const InstallPrompt: React.FC<InstallPromptProps> = ({ trigger }) => {
       
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-gray-900/75 dark:bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in duration-300" 
+        className="fixed inset-0 bg-gray-900/75 dark:bg-dark-bg/80 backdrop-blur-sm transition-opacity animate-in fade-in duration-300" 
         onClick={handleDismiss}
         aria-hidden="true" 
       />
